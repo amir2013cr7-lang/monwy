@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ledgerly – Where my money goes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#edf0f5;--sf:#fff;--sf2:#f4f6fa;--ink:#121a2b;--mute:#5d6b83;--line:#d7dde8;--usd:#0b8f6f;--lbp:#2f54eb;--bad:#d92d4a;--sh:0 1px 2px rgba(18,26,43,.06),0 14px 34px -14px rgba(18,26,43,.2)}
+:root[data-theme=dark]{--bg:#131a2b;--sf:#1b2438;--sf2:#222d45;--ink:#eaf0fb;--mute:#96a3bb;--line:#2c3854;--usd:#3fd6ae;--lbp:#7b96ff;--bad:#ff6b84;--sh:none}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.55 'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:auto;padding:22px 20px 56px}
+h1,h2,.brand,dd,.bal{font-family:'Bricolage Grotesque','Hanken Grotesk',sans-serif;letter-spacing:-.025em}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:22px}
+.month{display:flex;align-items:center;gap:6px}
+#mlabel{min-width:140px;text-align:center;font-weight:700}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--sf);border-radius:999px;padding:7px 14px;transition:border-color .15s}
+button:hover{border-color:var(--mute)}
+.pri{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+input,select{background:var(--sf2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+:focus-visible{outline:2px solid var(--lbp);outline-offset:2px}
+.hero{padding:46px 0 36px}
+h1{font-size:clamp(32px,6.2vw,62px);font-weight:800;line-height:1.04}
+#tip{margin-top:10px;color:var(--mute);font-size:17px;max-width:60ch}
+.facts{display:flex;gap:36px;flex-wrap:wrap;margin:24px 0 30px}
+dt{font-size:13px;color:var(--mute)}
+dd{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+.wallets{display:flex;gap:14px;flex-wrap:wrap}
+.part{flex:1 1 260px;min-width:0}
+.trk{height:8px;border-radius:8px;background:color-mix(in srgb,var(--c) 20%,transparent);overflow:hidden}
+.trk i{display:block;height:100%;background:var(--c);border-radius:8px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.part .trk{height:48px;border-radius:14px}
+.part .trk i{border-radius:14px}
+.part p{margin-top:10px;font-weight:700}
+.bal{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15}
+small,.mute{color:var(--mute)}
+small{font-size:13px;display:block;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:5fr 7fr;gap:46px;align-items:start}
+.side section{padding-bottom:28px;margin-bottom:28px;border-bottom:1px solid var(--line)}
+.side section:last-child{border:0;margin:0}
+h2{font-size:22px;font-weight:700;margin-bottom:12px}
+.f{display:block;font-size:13px;color:var(--mute);font-weight:600;margin:14px 0 0}
+.f input{margin-top:6px;color:var(--ink)}
+.cr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin-bottom:13px}
+.cr b{font-variant-numeric:tabular-nums}
+.cr .trk{grid-column:1/-1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--sf2);border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 12px;font-size:14px}
+.row{display:flex;gap:8px;margin-top:12px}
+.ledger{background:var(--sf);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--sh)}
+.tform{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 18px}
+.tog{display:flex;background:var(--sf2);border-radius:999px;padding:4px}
+.tog label{flex:1}
+.tog input{display:none}
+.tog span{display:block;text-align:center;padding:7px 4px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.tog input:checked+span{background:var(--ink);color:var(--bg)}
+.tform .pri{grid-column:1/-1;padding:11px}
+#list{max-height:420px;overflow:auto}
+.tr{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.tr div{flex:1;min-width:0}
+.tr small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr span{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.in{color:var(--usd)}
+.x{border:0;background:none;color:var(--mute);padding:4px 8px}
+.x:hover{color:var(--bad)}
+.del{font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.empty{padding:14px 0}
+footer{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:40px;font-size:13px;color:var(--mute);align-items:center}
+footer button{font-size:13px;padding:6px 12px}
+@media(max-width:860px){.cols{grid-template-columns:1fr;gap:34px}.hero{padding-top:30px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">Ledgerly</div>
+  <div class="month"><button id="prev" aria-label="Previous month">‹</button><span id="mlabel"></span><button id="next" aria-label="Next month">›</button></div>
+  <button id="theme" aria-label="Switch theme">Theme</button>
+</header>
+
+<section class="hero">
+  <h1 id="tot"></h1>
+  <p id="tip"></p>
+  <dl class="facts">
+    <div><dt>Spent this month</dt><dd id="fSp"></dd></div>
+    <div><dt>Received this month</dt><dd id="fRc"></dd></div>
+    <div><dt>Purchases</dt><dd id="fN"></dd></div>
+  </dl>
+  <div class="wallets" id="wallets"></div>
+</section>
+
+<main class="cols">
+  <div class="side">
+    <section>
+      <h2>My money</h2>
+      <p class="mute">Enter what you have right now. Everything you log after this changes your balance.</p>
+      <label class="f">Dollars (USD) <input id="u0" type="number" min="0" step="any" placeholder="0"></label>
+      <label class="f">Lebanese pounds (LBP) <input id="l0" type="number" min="0" step="any" placeholder="0"></label>
+      <label class="f">Exchange rate (LBP for $1) <input id="rate" type="number" min="1" step="any"></label>
+    </section>
+    <section>
+      <h2>Where it went</h2>
+      <div id="cats"></div>
+    </section>
+    <section>
+      <h2>My categories</h2>
+      <p class="mute">Add your own, like Football or Phone credit.</p>
+      <div class="chips" id="chips"></div>
+      <form id="cf" class="row"><input id="cn" placeholder="New category" maxlength="24" required><button class="pri">Add</button></form>
+    </section>
+  </div>
+
+  <section class="ledger">
+    <h2>Ledger</h2>
+    <form id="tf" class="tform">
+      <div class="tog"><label><input type="radio" name="type" value="out" checked><span>Spent</span></label><label><input type="radio" name="type" value="in"><span>Got money</span></label></div>
+      <div class="tog"><label><input type="radio" name="cur" value="USD" checked><span>USD</span></label><label><input type="radio" name="cur" value="LBP"><span>LBP</span></label></div>
+      <input id="amt" type="number" min="0" step="any" placeholder="Amount" required aria-label="Amount">
+      <select id="cat" aria-label="Category"></select>
+      <input id="date" type="date" required aria-label="Date">
+      <input id="note" placeholder="What was it? (optional)" aria-label="Note">
+      <button class="pri">Add to ledger</button>
+    </form>
+    <div id="list"></div>
+  </section>
+</main>
+
+<footer>
+  <span>Saved in this browser only.</span>
+  <button id="exp">Export backup</button>
+  <button onclick="document.getElementById('imp').click()">Import backup</button>
+  <input id="imp" type="file" accept="application/json" hidden>
+  <button id="rst">Reset all data</button>
+</footer>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s),KEY='ledgerly.v2';
+const DEF=['Snacks','Food & drinks','Going out','Games','Tech & gadgets','Clothes & care','Transport','Gifts','Big purchase','Savings','Other'];
+const INC=['Work','Gift','Exchange','Other'];
+const PAL=['#4f7cff','#ff8a3d','#12b886','#e64980','#9775fa','#fab005','#15aabf','#82c91e','#f06595','#5c7cfa','#868e96','#e8590c'];
+const def=()=>({theme:'',rate:89500,u0:'',l0:'',cats:[],tx:[]});
+const norm=o=>({...def(),...o,tx:Array.isArray(o&&o.tx)?o.tx:[],cats:Array.isArray(o&&o.cats)?o.cats:[]});
+let S;try{S=norm(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=def()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const p2=n=>String(n).padStart(2,'0'),ym=d=>d.getFullYear()+'-'+p2(d.getMonth()+1);
+const today=()=>{const d=new Date();return ym(d)+'-'+p2(d.getDate())};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const nfU=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+const fU=n=>nfU.format(n),fL=n=>Math.round(n).toLocaleString('en-US')+' LBP';
+const fm=(c,n)=>c==='USD'?fU(n):fL(n);
+const rate=()=>+S.rate||89500,toU=x=>x.cur==='USD'?x.amt:x.amt/rate();
+const allCats=()=>[...DEF,...S.cats],col=c=>PAL[Math.max(0,allCats().indexOf(c))%PAL.length];
+let M=ym(new Date());
+
+const start=c=>+S[c==='USD'?'u0':'l0']||0;
+const got=c=>S.tx.filter(x=>x.cur===c&&x.type==='in').reduce((s,x)=>s+x.amt,0);
+const gone=c=>S.tx.filter(x=>x.cur===c&&x.type==='out').reduce((s,x)=>s+x.amt,0);
+const bal=c=>start(c)+got(c)-gone(c);
+
+function wallets(){
+  $('#wallets').innerHTML=[['USD','Dollars','var(--usd)'],['LBP','Lebanese pounds','var(--lbp)']].map(([c,n,v])=>{
+    const b=bal(c),all=start(c)+got(c),p=all>0?Math.max(0,Math.min(100,b/all*100)):0;
+    return `<div class="part" style="--c:${v}"><div class="trk"><i style="width:${p}%"></i></div><p>${n}</p><div class="bal"${b<0?' style="color:var(--bad)"':''}>${fm(c,b)}</div><small>${all>0?Math.round(p)+'% of your money left':'Enter your amount under My money'}</small></div>`;
+  }).join('');
+}
+function render(){
+  const[y,m]=M.split('-'),t=S.tx.filter(x=>x.date.startsWith(M)),out=t.filter(x=>x.type==='out'),inn=t.filter(x=>x.type==='in');
+  const spent=out.reduce((s,x)=>s+toU(x),0),recv=inn.reduce((s,x)=>s+toU(x),0),byCat={};
+  out.forEach(x=>byCat[x.cat]=(byCat[x.cat]||0)+toU(x));
+  const ents=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  $('#mlabel').textContent=new Date(y,m-1).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const total=bal('USD')+bal('LBP')/rate();
+  $('#tot').textContent=`About ${fU(total)} in total`;
+  $('#tip').textContent=!S.tx.length&&!start('USD')&&!start('LBP')?'Start by entering the money you have right now under My money.':!out.length?'Nothing spent this month yet. Add purchases in the ledger.':`You spent about ${fU(spent)} this month. Most of it went on ${ents[0][0]} (${Math.round(ents[0][1]/spent*100)}%).`;
+  $('#fSp').textContent=fU(spent);$('#fRc').textContent=fU(recv);$('#fN').textContent=out.length;
+  wallets();
+  const mx=ents.length?ents[0][1]:1;
+  $('#cats').innerHTML=ents.length?ents.map(([k,v])=>`<div class="cr" style="--c:${col(k)}"><span>${esc(k)}</span><b>${fU(v)}</b><div class="trk"><i style="width:${v/mx*100}%"></i></div></div>`).join('')+`<small>LBP is converted at ${rate().toLocaleString('en-US')} per $1.</small>`:'<p class="mute empty">Your spending by category shows up here.</p>';
+  const rows=[...t].sort((a,b)=>b.date.localeCompare(a.date));
+  $('#list').innerHTML=rows.length?rows.map(x=>`<div class="tr" style="--c:${x.type==='in'?'var(--usd)':col(x.cat)}"><i class="dot"></i><div><b>${esc(x.cat)}</b><small>${x.date.slice(8)}/${x.date.slice(5,7)}${x.note?' – '+esc(x.note):''}</small></div><span class="${x.type}">${x.type==='in'?'+':'−'}${fm(x.cur,x.amt)}</span><button class="x del" data-del="${x.id}" aria-label="Delete transaction">Delete</button></div>`).join(''):'<p class="mute empty">No transactions this month. Add one above.</p>';
+  $('#chips').innerHTML=S.cats.length?S.cats.map(c=>`<span class="chip">${esc(c)}<button class="x" data-cdel="${esc(c)}" aria-label="Remove ${esc(c)}">✕</button></span>`).join(''):'';
+}
+function catOpts(){
+  const inc=$('#tf').elements.type.value==='in',v=$('#cat').value;
+  $('#cat').innerHTML=(inc?INC:allCats()).map(k=>`<option>${esc(k)}</option>`).join('');
+  if([...$('#cat').options].some(o=>o.value===v))$('#cat').value=v;
+}
+function init(){
+  document.documentElement.dataset.theme=S.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  $('#u0').value=S.u0;$('#l0').value=S.l0;$('#rate').value=S.rate;
+  $('#date').value=today();catOpts();render();
+}
+const shift=n=>{const[y,m]=M.split('-').map(Number);M=ym(new Date(y,m-1+n,1));render()};
+$('#prev').onclick=()=>shift(-1);$('#next').onclick=()=>shift(1);
+$('#theme').onclick=()=>{S.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=S.theme;save()};
+[['#u0','u0'],['#l0','l0'],['#rate','rate']].forEach(([s,k])=>$(s).oninput=e=>{S[k]=e.target.value;save();render()});
+$('#tf').onchange=e=>{if(e.target.name==='type')catOpts()};
+$('#tf').onsubmit=e=>{
+  e.preventDefault();
+  const a=Math.abs(+$('#amt').value),f=e.target.elements;if(!a)return;
+  S.tx.push({id:uid(),type:f.type.value,cur:f.cur.value,cat:$('#cat').value,amt:a,date:$('#date').value,note:$('#note').value.trim()});
+  M=$('#date').value.slice(0,7);$('#amt').value=$('#note').value='';save();render();$('#amt').focus();
+};
+$('#cf').onsubmit=e=>{
+  e.preventDefault();
+  const n=$('#cn').value.trim();
+  if(n&&!allCats().some(c=>c.toLowerCase()===n.toLowerCase())){S.cats.push(n);save();catOpts()}
+  $('#cn').value='';render();
+};
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-del]'),c=e.target.closest('[data-cdel]');
+  if(d)S.tx=S.tx.filter(x=>x.id!==d.dataset.del);
+  else if(c){S.cats=S.cats.filter(x=>x!==c.dataset.cdel);save();catOpts();render();return}
+  else return;
+  save();render();
+});
+$('#exp').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download='ledgerly-backup.json';a.click();
+};
+$('#imp').onchange=async e=>{
+  try{S=norm(JSON.parse(await e.target.files[0].text()));save();init()}catch(_){alert('That file is not a valid Ledgerly backup.')}
+  e.target.value='';
+};
+$('#rst').onclick=()=>{if(confirm('Delete all data stored in this browser?')){S=def();save();init()}};
+init();
+})();
+</script>
+</body>
+</html>
